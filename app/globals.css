@@ -1,17 +1,49 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   ROOT VARIABLES (fallbacks)
+───────────────────────────────────────────── */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --color-primary: #ED1C24;
+  --color-secondary: #0A3458;
+  --color-lightBg: #84BCDA;
+  --color-textPrimary: #212121;
+  --color-textSecondary: #3D3D3D;
+  --color-divider: #D9D9D9;
+  --color-success: #009B62;
+  --color-warning: #FF9800;
+  --color-warningLight: #FFF3E0;
+  --color-alert: #CC0000;
+  --color-welcome: #0088FF;
 }
 
+/* ─────────────────────────────────────────────
+   TAILWIND THEME TOKENS
+───────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-lightBg: var(--color-lightBg);
+  --color-textPrimary: var(--color-textPrimary);
+  --color-textSecondary: var(--color-textSecondary);
+  --color-divider: var(--color-divider);
+  --color-warning: var(--color-warning);
+  --color-warningLight: var(--color-warningLight);
+  --color-alert: var(--color-alert);
+  --color-welcome: var(--color-welcome);
+  --color-success: var(--color-success);
 }
 
+/* ─────────────────────────────────────────────
+   DARK MODE
+───────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +51,45 @@
   }
 }
 
+/* ─────────────────────────────────────────────
+   GLOBAL STYLES
+───────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* html { */
+  /* Removes 300ms tap delay globally */
+  /* touch-action: manipulation;
+} */
+
+/* ─────────────────────────────────────────────
+   MOBILE TAP FIXES
+   Apply touch-action directly on interactive
+   elements — html-level alone doesn't cascade
+   reliably on Samsung/Xiaomi WebViews.
+───────────────────────────────────────────── */
+/* button,
+[role="button"],
+input,
+label,
+select {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+} */
+
+/* ─────────────────────────────────────────────
+   FIX: Do NOT override .hidden with
+   pointer-events — display:none already
+   removes elements from interaction, and
+   this override breaks event bubbling on
+   sibling elements and causes PhoneInput
+   to bleed touch events into the hidden panel.
+───────────────────────────────────────────── */
+
+/* Fix for PhoneInput z-index interference */
+.react-international-phone {
+  z-index: 10 !important;
 }
