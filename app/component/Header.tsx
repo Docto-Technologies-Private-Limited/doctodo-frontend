@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
+import { useRouter } from "next/navigation";
 
 function Logo() {
   return (
@@ -17,6 +18,7 @@ function Logo() {
 }
  
 export default function Header() {
+  const router = useRouter();
   return (
     <header
       className="sticky top-0 z-50 bg-white"
@@ -30,14 +32,15 @@ export default function Header() {
 
         {/* Login button */}
         <button
-          className="font-semibold text-white rounded-md transition-all duration-200 hover:opacity-90 active:scale-95 sm:block hidden bg-primary"
-          style={{
-            padding: 'clamp(8px, 1.5vw, 11px) clamp(20px, 3vw, 36px)',
-            fontSize: 'clamp(13px, 1.4vw, 15px)',
-          }}
-        >
-          Login
-        </button>
+        onClick={() => router.push("/auth/login")}
+        className="font-semibold text-white rounded-md transition-all duration-200 hover:opacity-90 active:scale-95 sm:block hidden bg-primary"
+        style={{
+          padding: "clamp(8px, 1.5vw, 11px) clamp(20px, 3vw, 36px)",
+          fontSize: "clamp(13px, 1.4vw, 15px)",
+        }}
+      >
+        Login
+      </button>
       </div>
     </header>
   )

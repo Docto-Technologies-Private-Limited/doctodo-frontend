@@ -1,9 +1,9 @@
 "use client";
 
-import { PhoneInput } from 'react-international-phone';
-import 'react-international-phone/style.css';
-import { isValidPhoneNumber } from 'libphonenumber-js';
-import { useState, useCallback } from "react";
+import { PhoneInput } from 'react-international-phone'
+import 'react-international-phone/style.css'
+import { isValidPhoneNumber } from 'libphonenumber-js'
+import { useState } from "react";
 
 type LoginMethod = "email" | "mobile";
 
@@ -15,25 +15,19 @@ export default function LoginPage() {
     const [mobile, setMobile] = useState('');
     const [error, setError] = useState('');
 
-    const handlePhoneChange = useCallback((phone: string) => {
+    const handleChange = (phone: string) => {
         setMobile(phone);
         if (phone && !isValidPhoneNumber(phone)) {
             setError('Invalid phone number for selected country');
         } else {
             setError('');
         }
-    }, []);
+    };
 
-    
-    const switchTab = useCallback((method: LoginMethod) => (e: React.MouseEvent) => {
-        e.preventDefault();
+    // FIX 1: Use a handler that fires on pointer down for instant mobile response
+    const switchTab = (method: LoginMethod) => {
         if (loginMethod !== method) setLoginMethod(method);
-    }, [loginMethod]);
-
-    const togglePassword = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        setShowPassword(prev => !prev);
-    }, []);
+    };
 
     return (
         <div className="min-h-screen w-full lg:flex items-stretch">
@@ -43,7 +37,7 @@ export default function LoginPage() {
                 <div className="p-8 rounded-2xl w-full max-w-[500px]" style={{
                     boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px"
                 }}>
-
+             
                     {/* Heading */}
                     <div className="text-center mb-7">
                         <h1 className="text-2xl md:text-3xl font-bold text-secondary tracking-tight mb-1.5">
@@ -52,22 +46,15 @@ export default function LoginPage() {
                         <p className="text-sm text-[#6b7a99]">Please Enter your details to login</p>
                     </div>
 
-                    {/* Toggle
-                        FIX 1: onClick instead of onPointerDown (see comment above).
-                        FIX 2: touch-action and -webkit-tap-highlight-color are now
-                        applied globally in globals.css to all buttons, so we don't
-                        need to repeat them here (but touch-manipulation class is
-                        harmless to keep for extra certainty).
-                    */}
+                    {/* Toggle — FIX 1: onPointerDown fires instantly on touch, no 300ms delay */}
                     <div className="flex rounded-xl p-1 mb-7 gap-1 bg-lightBg">
                         <button
                             type="button"
-                            onClick={switchTab("email")}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 touch-manipulation select-none ${
-                                loginMethod === "email"
+                            onPointerDown={() => switchTab("email")}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200  ${loginMethod === "email"
                                     ? "bg-[#1a3060] text-white shadow-md"
                                     : "text-secondary"
-                            }`}
+                                }`}
                         >
                             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -76,12 +63,11 @@ export default function LoginPage() {
                         </button>
                         <button
                             type="button"
-                            onClick={switchTab("mobile")}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 touch-manipulation select-none ${
-                                loginMethod === "mobile"
+                            onPointerDown={() => switchTab("mobile")}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 touch-manipulation ${loginMethod === "mobile"
                                     ? "bg-[#1a3060] text-white shadow-md"
                                     : "text-secondary"
-                            }`}
+                                }`}
                         >
                             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 15h3" />
@@ -89,33 +75,16 @@ export default function LoginPage() {
                             Mobile
                         </button>
                     </div>
+                  
 
-                    {/* Form Fields
-                        FIX 3: Keep BOTH panels always mounted (never unmount PhoneInput).
-                        Use visibility+height toggling instead of display:none to hide
-                        the inactive panel.
-
-                        WHY: When PhoneInput unmounts on tab switch it tears down its
-                        internal touch listeners. On the next mount it re-initialises,
-                        which on some Android browsers fires a spurious focus event that
-                        steals the active touch target away from the tab button — causing
-                        the switch to appear to do nothing.
-
-                        Using `aria-hidden` + `invisible h-0 overflow-hidden` keeps the
-                        elements in the DOM and in the accessibility tree correctly, while
-                        ensuring they take up no space and cannot be interacted with when
-                        the other tab is active.
-                    */}
-                    <div className="mb-6">
+                    {/* Form Fields */}
+                    {/* FIX 2: Both panels always mounted — only visibility toggled via CSS.
+              This prevents PhoneInput from re-initializing on every tab switch. */}
+                    <div className="space-y-4 mb-6">
 
                         {/* EMAIL PANEL */}
-                        <div
-                            aria-hidden={loginMethod !== "email"}
-                            className={loginMethod === "email"
-                                ? "block space-y-4"
-                                : "invisible h-0 overflow-hidden"
-                            }
-                        >
+                        <div className={loginMethod === "email" ? "block space-y-4" : "hidden"}>
+                            {/* Email field */}
                             <div>
                                 <label className="block text-sm font-semibold text-secondary mb-1.5">Email</label>
                                 <input
@@ -123,11 +92,11 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                                     placeholder="Enter your email"
-                                    tabIndex={loginMethod === "email" ? 0 : -1}
                                     className="w-full border border-[#d1d9e6] rounded-lg px-4 py-3 text-sm text-secondary placeholder-[#b0bac9] focus:outline-none focus:border-[#1a3060] focus:ring-2 focus:ring-[#1a3060]/10 transition-all"
                                 />
                             </div>
 
+                            {/* Password field */}
                             <div>
                                 <label className="block text-sm font-semibold text-secondary mb-1.5">Password/Login code</label>
                                 <div className="relative">
@@ -136,14 +105,11 @@ export default function LoginPage() {
                                         value={password}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                                         placeholder="Enter your Login code or Password"
-                                        tabIndex={loginMethod === "email" ? 0 : -1}
                                         className="w-full border border-[#d1d9e6] rounded-lg px-4 py-3 pr-11 text-sm text-secondary placeholder-[#b0bac9] focus:outline-none focus:border-[#1a3060] focus:ring-2 focus:ring-[#1a3060]/10 transition-all"
                                     />
-                                    {/* FIX 4: onClick instead of onPointerDown here too */}
                                     <button
                                         type="button"
-                                        onClick={togglePassword}
-                                        tabIndex={loginMethod === "email" ? 0 : -1}
+                                        onPointerDown={() => setShowPassword(!showPassword)}
                                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] hover:text-[#6b7a99] transition-colors touch-manipulation"
                                     >
                                         {showPassword ? (
@@ -162,28 +128,22 @@ export default function LoginPage() {
                         </div>
 
                         {/* MOBILE PANEL — always mounted, hidden via CSS when not active */}
-                        <div
-                            aria-hidden={loginMethod !== "mobile"}
-                            className={loginMethod === "mobile"
-                                ? "block space-y-4"
-                                : "invisible h-0 overflow-hidden"
-                            }
-                        >
+                        <div className={loginMethod === "mobile" ? "block space-y-4" : "hidden"}>
+                            {/* Mobile number field */}
                             <div className="space-y-1.5">
                                 <label className="block text-sm font-semibold text-textPrimary">
                                     Mobile Number
                                 </label>
                                 <div
-                                    className={`rounded-lg transition-all ${
-                                        error
+                                    className={`rounded-lg transition-all ${error
                                             ? 'border border-red-400 focus-within:ring-2 focus-within:ring-red-200'
                                             : 'border border-divider focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10'
-                                    }`}
+                                        }`}
                                 >
                                     <PhoneInput
                                         defaultCountry="in"
                                         value={mobile}
-                                        onChange={handlePhoneChange}
+                                        onChange={handleChange}
                                         className="w-full"
                                         inputClassName="!w-full !border-none !outline-none !px-4 !py-3 !text-sm !bg-transparent"
                                         countrySelectorStyleProps={{
@@ -198,37 +158,31 @@ export default function LoginPage() {
                                 )}
                             </div>
 
+                            {/* OTP / Login code */}
                             <div>
                                 <label className="block text-sm font-semibold text-secondary mb-1.5">OTP / Login code</label>
                                 <input
                                     type="text"
                                     placeholder="Enter your OTP or Login code"
-                                    tabIndex={loginMethod === "mobile" ? 0 : -1}
                                     className="w-full border border-[#d1d9e6] rounded-lg px-4 py-3 text-sm text-secondary placeholder-[#b0bac9] focus:outline-none focus:border-[#1a3060] focus:ring-2 focus:ring-[#1a3060]/10 transition-all"
                                 />
                             </div>
                         </div>
 
                     </div>
+                   
 
-                    {/* CTA Buttons
-                        FIX 5: active:bg-primary/80 instead of active:bg-secondary.
-                        secondary (#0A3458 navy) as the active state of a red button
-                        looks broken on mobile where active states are very visible.
-                        Using a darkened primary keeps it on-brand.
-                    */}
+                    {/* CTA Buttons */}
                     <div className="space-y-3">
                         <button
                             type="button"
-                            onClick={() => { /* your login handler */ }}
-                            className="w-full bg-primary active:bg-primary/80 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl text-sm tracking-wide transition-all duration-150 shadow-md shadow-primary/20 touch-manipulation select-none"
+                            className="w-full bg-primary active:bg-secondary active:scale-[0.99] text-white font-bold py-3.5 rounded-xl text-sm tracking-wide transition-all duration-150 shadow-md shadow-red-200 touch-manipulation"
                         >
                             Login
                         </button>
                         <button
                             type="button"
-                            onClick={() => { /* your get-code handler */ }}
-                            className="w-full border-2 border-primary text-primary active:bg-primary/10 active:scale-[0.99] font-bold py-3.5 rounded-xl text-sm tracking-wide transition-all duration-150 touch-manipulation select-none"
+                            className="w-full border-2 border-primary text-primary active:bg-secondary/10 active:scale-[0.99] font-bold py-3.5 rounded-xl text-sm tracking-wide transition-all duration-150 touch-manipulation"
                         >
                             {loginMethod === "email" ? "Get Login Code Via Email" : "Get OTP Via SMS"}
                         </button>
@@ -245,7 +199,9 @@ export default function LoginPage() {
                     alt="login-bg"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="relative z-10 p-8 rounded-2xl shadow-xl text-left bg-secondary w-full max-w-[500px]">
+                <div className="relative z-10 p-8 rounded-2xl shadow-xl text-left bg-secondary w-full max-w-[500px]"
+                    style={{ width: "500px" }}
+                >
                     <div className="mb-6">
                         <h2 className="text-xl font-bold text-white mb-2">Login Guidelines</h2>
                         <div className="w-10 h-0.5 bg-primary rounded-full" />
