@@ -43,7 +43,8 @@ export default function HomePage() {
   return (
     <>
       {/* ── Content Wrapper ── */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6">
+      
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6 ">
 
         <h1 className="text-base sm:text-lg font-bold text-gray-900">Dashboard</h1>
 
