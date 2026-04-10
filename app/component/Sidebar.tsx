@@ -332,7 +332,7 @@ export default function Sidebar() {
           className={`border-t border-gray-200 flex-shrink-0 transition-all duration-300 ${collapsed ? "p-2" : "p-4"}`}
         >
           <Link
-            href="/login"
+            href="/auth/login"
             title={collapsed ? "Log Out" : undefined}
             className="
               flex items-center justify-center gap-2 w-full py-2.5
