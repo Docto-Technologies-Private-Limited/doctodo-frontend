@@ -3,13 +3,13 @@
 import Sidebar from "@/app/component/Sidebar";
 import TopBar from "@/app/component/Topbar";
 
-export default function DashboardLayout({
+export default function LmsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex w-full overflow-x-hidden">
+    <div className="flex w-full overflow-x-clip">
       {/* Sidebar (with spacer) */}
       <Sidebar />
 

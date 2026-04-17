@@ -24,7 +24,6 @@ interface FormData {
 }
 
 interface PasswordForm {
-  oldPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
@@ -162,13 +161,13 @@ function EditField({
 
 // ─── Change Password Modal ────────────────────────────────────────────────────
 function ChangePasswordModal({ onClose }: { onClose: () => void }) {
-  const [form, setForm] = useState<PasswordForm>({ oldPassword: "", newPassword: "", confirmPassword: "" });
+  const [form, setForm] = useState<PasswordForm>({newPassword: "", confirmPassword: "" });
   const [errors, setErrors] = useState<Partial<PasswordForm>>({});
   const [saved, setSaved] = useState(false);
 
   const validate = () => {
     const e: Partial<PasswordForm> = {};
-    if (!form.oldPassword) e.oldPassword = "Required";
+    
     if (!form.newPassword || form.newPassword.length < 8) e.newPassword = "Min 8 characters";
     if (form.confirmPassword !== form.newPassword) e.confirmPassword = "Passwords do not match";
     setErrors(e);
@@ -199,14 +198,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           <p className="text-xs text-gray-500 mt-0.5">Update your password to keep your account secure</p>
         </div>
 
-        <div className="space-y-4">
-          <PasswordField
-            label="Old Password"
-            placeholder="Enter your old password"
-            value={form.oldPassword}
-            onChange={(v) => setForm({ ...form, oldPassword: v })}
-            error={errors.oldPassword}
-          />
+        <div className="space-y-4">     
           <PasswordField
             label="New Password"
             placeholder="Enter your new password"

@@ -43,12 +43,9 @@ export default function HomePage() {
   return (
     <>
       {/* ── Content Wrapper ── */}
-      
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6 ">
+      <div className="space-y-6 ">
 
-        <h1 className="text-base sm:text-lg font-bold text-gray-900">Dashboard</h1>
-
-        {/* ── Welcome ── */}
+           {/* ── Welcome ── */}
         <div>
           <p className="text-base font-semibold text-gray-800">
             Welcome Back, <strong className="text-secondary">David Joe</strong>
@@ -80,6 +77,10 @@ export default function HomePage() {
           />
         </div>
 
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6 mt-5">
+       
         {/* ── Upcoming Live Sessions ── */}
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -116,7 +117,7 @@ export default function HomePage() {
                       {title}
                     </p>
                    <span className="inline-flex items-center gap-1.5 mt-1.5 bg-lightBg rounded-full 
-                    px-1.5 py-0.5 text-[10px] 
+                    px-2 py-1 text-xs 
                     sm:px-2.5 sm:py-1 sm:text-[0.72rem] 
                     text-secondary font-medium whitespace-nowrap">
                       

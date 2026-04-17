@@ -284,8 +284,8 @@ export default function Sidebar() {
                   }
                   ${
                     isActive
-                      ? "text-primary bg-red-50 font-semibold"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-secondary font-medium"
+                      ? "text-primary bg-primaryLight font-semibold"
+                      : "text-gray-500 hover:bg-secondaryLight hover:text-secondary font-medium text-textPrimary"
                   }
                 `}
               >

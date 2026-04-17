@@ -324,7 +324,7 @@ export default function LoginPage() {
 
             {/* ── RIGHT — unchanged ─────────────────────────────────────── */}
             <div className="flex-1 relative flex items-center justify-center overflow-hidden min-h-0 px-4 py-4 sm:px-8 sm:py-8">
-                <div className="absolute inset-0 bg-lightBg opacity-40" />
+                <div className="absolute inset-0 bg-welcomeLight" />
                 <img
                     src="/images/elements/login-bg.png"
                     alt="login-bg"
@@ -335,7 +335,7 @@ export default function LoginPage() {
                     style={{ width: "500px" }}
                 >
                     <div className="mb-6">
-                        <h2 className="text-xl font-bold text-white mb-2">Login Guidelines</h2>
+                        <h2 className="text-base font-bold text-white mb-2">Login Guidelines</h2>
                         <div className="w-10 h-0.5 bg-primary rounded-full" />
                     </div>
                     <div className="mb-6">
@@ -345,7 +345,7 @@ export default function LoginPage() {
                         </div>
                         <p className="text-white text-xs leading-relaxed ml-3.5">
                             Enter your email address, click on{" "}
-                            <span className="font-semibold text-primary">&apos;Get login code in email&apos;</span>{" "}
+                            <span className="font-semibold text-white">&apos;Get login code in email&apos;</span>{" "}
                             button and login via login code sent to your email address.
                         </p>
                     </div>
@@ -355,10 +355,10 @@ export default function LoginPage() {
                             <h3 className="text-white font-semibold text-sm">Existing Users</h3>
                         </div>
                         <p className="text-white text-xs leading-relaxed ml-3.5">
-                            Enter your email and login code or password. Forgot your password? Click{" "}
-                            <span className="font-semibold text-primary">&apos;Get login code in email&apos;</span>. Change your
-                            password later via{" "}
-                            <span className="font-semibold text-primary">&apos;Menu → My Accounts&apos;</span>.
+                           Enter your email address and your login code or password to login. If you have forgot your password, click on{" "}
+                            <span className="font-semibold text-white">&apos;Get login code in email&apos;</span>
+                            button and login via login code sent to your email address. You can change your password in{" "}
+                            <span className="font-semibold text-white">&apos;Menu → My Accounts&apos;</span>.
                         </p>
                     </div>
                     <div className="border-t mb-5" style={{ borderColor: `${theme.colors.divider}26` }} />
