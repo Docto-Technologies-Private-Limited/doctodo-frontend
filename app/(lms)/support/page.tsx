@@ -10,6 +10,7 @@ interface Ticket {
   subject: string;
   status: TicketStatus;
   date: string;
+  message: string;
 }
 
 interface FaqItem {
@@ -24,9 +25,9 @@ interface FaqSection {
 
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 const TICKETS: Ticket[] = [
-  { id: "TK-001", subject: "Payment Issue",    status: "Open",        date: "16 Feb 2026" },
-  { id: "TK-002", subject: "Payment Billing",  status: "In-Progress", date: "15 Feb 2026" },
-  { id: "TK-003", subject: "Certificate Help", status: "Resolved",    date: "12 Feb 2026" },
+  { id: "TK-001", subject: "Payment Issue",    status: "Open",        date: "16 Feb 2026", message: "I was charged twice for my subscription renewal. The duplicate transaction appeared on my bank statement on 15 Feb 2026. Please investigate and process a refund for the extra charge." },
+  { id: "TK-002", subject: "Payment Billing",  status: "In-Progress", date: "15 Feb 2026", message: "My invoice for February 2026 shows an incorrect amount. The discount applied during checkout is not reflected in the final invoice. Kindly review and re-issue the corrected invoice." },
+  { id: "TK-003", subject: "Certificate Help", status: "Resolved",    date: "12 Feb 2026", message: "I completed the Advanced Cardiac Life Support programme on 10 Feb but my certificate has not appeared in my account. Could you please check the status and make it available for download?" },
 ];
 
 const CATEGORIES = [
@@ -102,7 +103,11 @@ function IconChevron({ open }: { open: boolean }) {
     <svg
       width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-      className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+      style={{
+        transform: open ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.3s ease",
+        display: "block",
+      }}
     >
       <polyline points="6 9 12 15 18 9" />
     </svg>
@@ -124,6 +129,14 @@ function IconTicket() {
     </svg>
   );
 }
+function IconEye() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
 function IconEmpty() {
   return (
     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -139,22 +152,47 @@ function IconEmpty() {
 // ─── FAQ Accordion Item ───────────────────────────────────────────────────────
 function FaqAccordionItem({ item, isLast }: { item: FaqItem; isLast: boolean }) {
   const [open, setOpen] = useState(false);
+  const [maxHeight, setMaxHeight] = useState("0px");
+  const bodyRef = useState<HTMLDivElement | null>(null);
+
+  const handleToggle = () => {
+    if (!open) {
+      // Get the scrollHeight before opening
+      const el = document.getElementById(`faq-body-${item.question.slice(0, 20).replace(/\s/g, "-")}`);
+      if (el) setMaxHeight(el.scrollHeight + "px");
+      setOpen(true);
+    } else {
+      setMaxHeight("0px");
+      setOpen(false);
+    }
+  };
+
+  const bodyId = `faq-body-${item.question.slice(0, 20).replace(/\s/g, "-")}`;
+
   return (
     <div className={`${!isLast ? "border-b border-gray-100" : ""}`}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors duration-150 rounded-lg"
       >
         <span className="text-sm font-medium text-gray-800 leading-snug">{item.question}</span>
-        <span className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-150 ${open ? "bg-secondary text-white" : "bg-secondary text-white"}`}>
+        <span className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center bg-secondary text-white">
           <IconChevron open={open} />
         </span>
       </button>
-      {open && (
+      <div
+        id={bodyId}
+        style={{
+          maxHeight: maxHeight,
+          overflow: "hidden",
+          transition: "max-height 0.35s ease, opacity 0.3s ease",
+          opacity: open ? 1 : 0,
+        }}
+      >
         <div className="px-4 pb-4">
           <p className="text-sm text-gray-500 leading-relaxed">{item.answer}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -176,35 +214,14 @@ function FaqSection({ section }: { section: FaqSection }) {
   );
 }
 
-// ─── Raise Ticket Modal ───────────────────────────────────────────────────────
-function RaiseTicketModal({
+// ─── View Message Modal ───────────────────────────────────────────────────────
+function ViewMessageModal({
+  ticket,
   onClose,
-  onSubmit,
 }: {
+  ticket: Ticket;
   onClose: () => void;
-  onSubmit: (ticket: { subject: string; category: string }) => void;
 }) {
-  const [category, setCategory]   = useState("");
-  const [subject, setSubject]     = useState("");
-  const [description, setDescription] = useState("");
-  const [emailMe, setEmailMe]     = useState(false);
-  const [errors, setErrors]       = useState<Record<string, string>>({});
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!category)    e.category    = "Please select a category.";
-    if (!subject.trim())    e.subject    = "Subject is required.";
-    if (!description.trim()) e.description = "Description is required.";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (!validate()) return;
-    onSubmit({ subject: subject.trim(), category });
-  };
-
-  // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -219,6 +236,92 @@ function RaiseTicketModal({
         {/* Modal Header */}
         <div className="flex items-start justify-between p-5 pb-4">
           <div>
+            <h2 className="text-base font-bold text-gray-900">Support Ticket</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Ticket details and message</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-white hover:brightness-90 transition-all flex-shrink-0 mt-0.5"
+          >
+            <IconX />
+          </button>
+        </div>
+
+        <div className="border-t border-gray-100" />
+
+        {/* Modal Body */}
+        <div className="p-5 space-y-4">
+          <div>
+            <p className="text-xs font-semibold text-gray-400 mb-1">Ticket ID</p>
+            <p className="text-sm font-mono font-semibold text-secondary">{ticket.id}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 mb-1">Subject</p>
+            <p className="text-sm font-medium text-gray-800">{ticket.subject}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 mb-1">Message</p>
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+              <p className="text-sm text-gray-600 leading-relaxed">{ticket.message}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-5 pt-3 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="w-full flex items-center justify-center gap-2 bg-primary text-white text-sm font-bold py-2.5 rounded-xl hover:brightness-90 transition-all duration-150 shadow-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Raise Ticket Modal ───────────────────────────────────────────────────────
+function RaiseTicketModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (ticket: { subject: string; category: string; message: string }) => void;
+}) {
+  const [category, setCategory]       = useState("");
+  const [subject, setSubject]         = useState("");
+  const [description, setDescription] = useState("");
+  const [emailMe, setEmailMe]         = useState(false);
+  const [errors, setErrors]           = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!category)           e.category    = "Please select a category.";
+    if (!subject.trim())     e.subject     = "Subject is required.";
+    if (!description.trim()) e.description = "Description is required.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    onSubmit({ subject: subject.trim(), category, message: description.trim() });
+  };
+
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div
+      onClick={handleBackdrop}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden">
+
+        <div className="flex items-start justify-between p-5 pb-4">
+          <div>
             <h2 className="text-base font-bold text-gray-900">Raise a Support Ticket</h2>
             <p className="text-xs text-gray-400 mt-0.5">Get timely assistance from our support team.</p>
           </div>
@@ -230,13 +333,9 @@ function RaiseTicketModal({
           </button>
         </div>
 
-        {/* Divider */}
         <div className="border-t border-gray-100" />
 
-        {/* Modal Body */}
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-
-          {/* Category */}
           <div>
             <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-0.5">
               Category <span className="text-primary">*</span>
@@ -245,11 +344,7 @@ function RaiseTicketModal({
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value); setErrors((p) => ({ ...p, category: "" })); }}
-                className={`
-                  w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white appearance-none
-                  focus:outline-none focus:border-secondary transition-colors duration-150
-                  ${errors.category ? "border-red-400" : "border-gray-200"}
-                `}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 bg-white appearance-none focus:outline-none focus:border-secondary transition-colors duration-150 ${errors.category ? "border-red-400" : "border-gray-200"}`}
               >
                 <option value="">Select a Category</option>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -261,7 +356,6 @@ function RaiseTicketModal({
             {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category}</p>}
           </div>
 
-          {/* Subject */}
           <div>
             <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-0.5">
               Subject <span className="text-primary">*</span>
@@ -271,16 +365,11 @@ function RaiseTicketModal({
               value={subject}
               onChange={(e) => { setSubject(e.target.value); setErrors((p) => ({ ...p, subject: "" })); }}
               placeholder="Brief title of your issue"
-              className={`
-                w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400
-                focus:outline-none focus:border-secondary transition-colors duration-150
-                ${errors.subject ? "border-red-400" : "border-gray-200"}
-              `}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-secondary transition-colors duration-150 ${errors.subject ? "border-red-400" : "border-gray-200"}`}
             />
             {errors.subject && <p className="text-xs text-red-500 mt-1">{errors.subject}</p>}
           </div>
 
-          {/* Description */}
           <div>
             <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-0.5">
               Description <span className="text-primary">*</span>
@@ -290,16 +379,11 @@ function RaiseTicketModal({
               onChange={(e) => { setDescription(e.target.value); setErrors((p) => ({ ...p, description: "" })); }}
               placeholder="Describe your issue in detail"
               rows={4}
-              className={`
-                w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 resize-none
-                focus:outline-none focus:border-secondary transition-colors duration-150
-                ${errors.description ? "border-red-400" : "border-gray-200"}
-              `}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:border-secondary transition-colors duration-150 ${errors.description ? "border-red-400" : "border-gray-200"}`}
             />
             {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
           </div>
 
-          {/* Email checkbox */}
           <label className="flex items-center gap-2.5 cursor-pointer group">
             <input
               type="checkbox"
@@ -313,7 +397,6 @@ function RaiseTicketModal({
           </label>
         </div>
 
-        {/* Modal Footer */}
         <div className="p-5 pt-3 border-t border-gray-100">
           <button
             onClick={handleSubmit}
@@ -331,7 +414,7 @@ function RaiseTicketModal({
 // ─── Success Toast ────────────────────────────────────────────────────────────
 function SuccessToast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg animate-bounce-once">
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-green-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
       {message}
       <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100"><IconX /></button>
@@ -341,19 +424,21 @@ function SuccessToast({ message, onClose }: { message: string; onClose: () => vo
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HelpSupportPage() {
-  const [tickets, setTickets]       = useState<Ticket[]>(TICKETS);
-  const [showModal, setShowModal]   = useState(false);
-  const [toast, setToast]           = useState("");
+  const [tickets, setTickets]             = useState<Ticket[]>(TICKETS);
+  const [showRaise, setShowRaise]         = useState(false);
+  const [viewTicket, setViewTicket]       = useState<Ticket | null>(null);
+  const [toast, setToast]                 = useState("");
 
-  const handleSubmitTicket = ({ subject, category }: { subject: string; category: string }) => {
+  const handleSubmitTicket = ({ subject, category, message }: { subject: string; category: string; message: string }) => {
     const newTicket: Ticket = {
       id:      `TK-${String(tickets.length + 1).padStart(3, "0")}`,
       subject,
       status:  "Open",
       date:    new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      message,
     };
     setTickets((prev) => [newTicket, ...prev]);
-    setShowModal(false);
+    setShowRaise(false);
     setToast(`Ticket "${subject}" submitted successfully!`);
     setTimeout(() => setToast(""), 4000);
   };
@@ -371,29 +456,28 @@ export default function HelpSupportPage() {
         {/* ── My Tickets ── */}
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
 
-          {/* Card Header */}
           <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-gray-100">
             <div>
               <h2 className="text-sm font-bold text-gray-800">My Tickets</h2>
               <p className="text-xs text-gray-400 mt-0.5">Track your support requests</p>
             </div>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => setShowRaise(true)}
               className="flex items-center gap-1.5 bg-primary text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:brightness-90 transition-all duration-150 shadow-sm flex-shrink-0"
             >
               <IconPlus />
-              <span className="hidden xs:inline sm:inline">Raise a Support Request</span>
-              <span className="xs:hidden sm:hidden">Raise Request</span>
+              <span>Raise a Support Request</span>
             </button>
           </div>
 
-          {/* Table — Desktop/Tablet */}
+          {/* Table — Desktop/Tablet (scrollable body) */}
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left text-xs font-semibold text-gray-500 px-5 py-3 w-24">ID</th>
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Subject</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 w-28">Message</th>
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 w-36">
                     <span className="flex items-center gap-1">
                       Status
@@ -403,28 +487,42 @@ export default function HelpSupportPage() {
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3 w-36">Date</th>
                 </tr>
               </thead>
-              <tbody>
-                {tickets.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center py-10">
-                      <div className="flex flex-col items-center gap-2">
-                        <IconEmpty />
-                        <p className="text-sm text-gray-400 font-medium">No entries found.</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  tickets.map((t, idx) => (
-                    <tr key={t.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-100 ${idx === tickets.length - 1 ? "border-b-0" : ""}`}>
-                      <td className="px-5 py-3.5 text-xs font-mono font-semibold text-secondary">{t.id}</td>
-                      <td className="px-4 py-3.5 text-sm text-gray-700 font-medium">{t.subject}</td>
-                      <td className="px-4 py-3.5"><StatusBadge status={t.status} /></td>
-                      <td className="px-4 py-3.5 text-xs text-gray-500">{t.date}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
             </table>
+            {/* Scrollable body wrapper */}
+            <div className="max-h-72 overflow-y-auto">
+              <table className="w-full text-sm">
+                <tbody>
+                  {tickets.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-10">
+                        <div className="flex flex-col items-center gap-2">
+                          <IconEmpty />
+                          <p className="text-sm text-gray-400 font-medium">No entries found.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    tickets.map((t, idx) => (
+                      <tr key={t.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-100 ${idx === tickets.length - 1 ? "border-b-0" : ""}`}>
+                        <td className="px-5 py-3.5 text-xs font-mono font-semibold text-secondary w-24">{t.id}</td>
+                        <td className="px-4 py-3.5 text-sm text-gray-700 font-medium">{t.subject}</td>
+                        <td className="px-4 py-3.5 w-28">
+                          <button
+                            onClick={() => setViewTicket(t)}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary border border-secondary/30 rounded-lg px-2.5 py-1.5 hover:bg-secondary/5 transition-colors duration-150"
+                          >
+                            <IconEye />
+                            View
+                          </button>
+                        </td>
+                        <td className="px-4 py-3.5 w-36"><StatusBadge status={t.status} /></td>
+                        <td className="px-4 py-3.5 text-xs text-gray-500 w-36">{t.date}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Cards — Mobile */}
@@ -435,13 +533,22 @@ export default function HelpSupportPage() {
                 <p className="text-sm text-gray-400 font-medium">No entries found.</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
                 {tickets.map((t) => (
                   <div key={t.id} className="px-4 py-3.5 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-mono font-semibold text-secondary">{t.id}</p>
                       <p className="text-sm font-medium text-gray-800 mt-0.5 leading-snug">{t.subject}</p>
-                      <p className="text-xs text-gray-400 mt-1">{t.date}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <button
+                          onClick={() => setViewTicket(t)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-secondary border border-secondary/30 rounded-md px-2 py-1 hover:bg-secondary/5 transition-colors duration-150"
+                        >
+                          <IconEye />
+                          View
+                        </button>
+                        <p className="text-xs text-gray-400">{t.date}</p>
+                      </div>
                     </div>
                     <StatusBadge status={t.status} />
                   </div>
@@ -470,10 +577,18 @@ export default function HelpSupportPage() {
 
       </div>
 
-      {/* ── Modal ── */}
-      {showModal && (
+      {/* ── View Message Modal ── */}
+      {viewTicket && (
+        <ViewMessageModal
+          ticket={viewTicket}
+          onClose={() => setViewTicket(null)}
+        />
+      )}
+
+      {/* ── Raise Ticket Modal ── */}
+      {showRaise && (
         <RaiseTicketModal
-          onClose={() => setShowModal(false)}
+          onClose={() => setShowRaise(false)}
           onSubmit={handleSubmitTicket}
         />
       )}

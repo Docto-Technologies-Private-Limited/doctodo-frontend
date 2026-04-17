@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type TabKey = "all" | "unread" | "read";
@@ -68,6 +69,73 @@ function IconCheck() {
     </svg>
   );
 }
+function IconWarning() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
+// ─── Confirm Modal ────────────────────────────────────────────────────────────
+interface ConfirmModalProps {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  confirmStyle?: "danger" | "success";
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmModal({
+  title,
+  message,
+  confirmLabel,
+  confirmStyle = "danger",
+  onConfirm,
+  onCancel,
+}: ConfirmModalProps) {
+  const confirmClass =
+    confirmStyle === "success"
+      ? "bg-green-600 hover:bg-green-700 text-white"
+      : "bg-red-600 hover:bg-red-700 text-white";
+
+  const iconBg =
+    confirmStyle === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden">
+        <div className="p-6 flex flex-col items-center text-center gap-3">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${iconBg}`}>
+            <IconWarning />
+          </div>
+          <h2 className="text-base font-bold text-gray-900">{title}</h2>
+          <p className="text-sm text-gray-500 leading-relaxed">{message}</p>
+        </div>
+        <div className="border-t border-gray-100 flex">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors duration-150 border-r border-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 py-3 text-sm font-semibold transition-colors duration-150 ${confirmClass}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 function EmptyState({ tab }: { tab: TabKey }) {
@@ -92,16 +160,19 @@ function NotifRow({
   notif,
   isLast,
   onDelete,
+  onClick,
 }: {
   notif: Notification;
   isLast: boolean;
   onDelete: (id: number) => void;
+  onClick: (notif: Notification) => void;
 }) {
   return (
     <div
+      onClick={() => onClick(notif)}
       className={`
         group flex items-start gap-3 px-4 sm:px-5 py-4
-        transition-colors duration-150
+        transition-colors duration-150 cursor-pointer
         ${notif.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"}
         ${!isLast ? "border-b border-gray-100" : ""}
       `}
@@ -117,7 +188,7 @@ function NotifRow({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-gray-800 leading-snug">{notif.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{notif.body}</p>
+        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed line-clamp-1">{notif.body}</p>
         <div className="flex items-center gap-1 mt-1.5 text-gray-400">
           <IconClock />
           <span className="text-xs">{notif.time}</span>
@@ -126,7 +197,7 @@ function NotifRow({
 
       {/* Delete button */}
       <button
-        onClick={() => onDelete(notif.id)}
+        onClick={(e) => { e.stopPropagation(); onDelete(notif.id); }}
         className="
           flex-shrink-0 w-8 h-8 rounded-lg
           bg-red-50 hover:bg-red-100
@@ -145,10 +216,21 @@ function NotifRow({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function NotificationsPage() {
+  const router = useRouter();
+
   const [notifications, setNotifications] = useState<Notification[]>(SEED);
   const [activeTab, setActiveTab]         = useState<TabKey>("all");
   const [searchQuery, setSearchQuery]     = useState("");
   const [visibleCount, setVisibleCount]   = useState(PAGE_SIZE);
+
+  // Confirm modal state
+  const [confirmModal, setConfirmModal] = useState<null | {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    confirmStyle?: "danger" | "success";
+    onConfirm: () => void;
+  }>(null);
 
   // ── Derived list ──
   const filtered = useMemo(() => {
@@ -179,15 +261,50 @@ export default function NotificationsPage() {
   };
 
   const handleDelete = (id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setConfirmModal({
+      title: "Delete Notification",
+      message: "Are you sure you want to delete this notification? This action cannot be undone.",
+      confirmLabel: "Delete",
+      confirmStyle: "danger",
+      onConfirm: () => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        setConfirmModal(null);
+      },
+    });
   };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = () => {
+    setConfirmModal({
+      title: "Mark All as Read",
+      message: "Are you sure you want to mark all notifications as read?",
+      confirmLabel: "Mark as Read",
+      confirmStyle: "success",
+      onConfirm: () => {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        setConfirmModal(null);
+      },
+    });
   };
 
-  const clearAll = () => {
-    setNotifications((prev) => prev.filter((n) => !n.read));
+  const handleClearAll = () => {
+    setConfirmModal({
+      title: "Clear All Notifications",
+      message: "Are you sure you want to clear all read notifications? This action cannot be undone.",
+      confirmLabel: "Clear All",
+      confirmStyle: "danger",
+      onConfirm: () => {
+        setNotifications((prev) => prev.filter((n) => !n.read));
+        setConfirmModal(null);
+      },
+    });
+  };
+
+  const handleRowClick = (notif: Notification) => {
+    // Mark as read when opening
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
+    );
+    router.push(`/notifications/${notif.id}`);
   };
 
   // ── Tab config ──
@@ -198,131 +315,146 @@ export default function NotificationsPage() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <>
+      <div className="space-y-4 sm:space-y-5">
 
-      {/* ── Page Header ── */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-          Notifications
-        </h1>
-        <p className="text-xs text-gray-400 mt-0.5">
-          Stay updated with your latest activity
-        </p>
-      </div>
-
-      {/* ── Controls Row ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit bg-lightBg">
-          {tabs.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => handleTabChange(key)}
-              className={`
-                px-4 py-1.5 rounded-md text-sm font-semibold transition-all duration-150
-                ${activeTab === key
-                  ? "bg-secondary text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-700 bg-transparent"
-                }
-              `}
-            >
-              {label}
-            </button>
-          ))}
+        {/* ── Page Header ── */}
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+            Notifications
+          </h1>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Stay updated with your latest activity
+          </p>
         </div>
 
-        {/* Search + Action buttons */}
-        <div className="flex items-center gap-2 flex-1 sm:justify-end flex-wrap">
+        {/* ── Controls Row ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
 
-          {/* Search */}
-          <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-white flex-1 sm:flex-none sm:w-52 md:w-64 focus-within:border-secondary transition-colors duration-150">
-            <span className="text-gray-400 flex-shrink-0"><IconSearch /></span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearch}
-              placeholder="Search"
-              className="text-sm text-gray-700 bg-transparent border-none w-full placeholder-gray-400 focus:outline-none"
-            />
-          </div>
-
-          {/* Mark all as Read — Unread tab only */}
-          {activeTab === "unread" && (
-            <button
-              onClick={markAllAsRead}
-              className="
-                flex items-center gap-1.5
-                text-xs sm:text-sm font-semibold
-                text-green-700 bg-green-50 border border-green-200
-                rounded-lg px-3 py-2
-                hover:bg-green-100 transition-colors duration-150
-                whitespace-nowrap
-              "
-            >
-              <span className="text-green-600"><IconCheck /></span>
-              <span className="hidden xs:inline sm:inline">Mark all as Read</span>
-              <span className="xs:hidden sm:hidden">Mark Read</span>
-            </button>
-          )}
-
-          {/* Clear All — Read tab only */}
-          {activeTab === "read" && (
-            <button
-              onClick={clearAll}
-              className="
-                flex items-center gap-1.5
-                text-xs sm:text-sm font-semibold
-                text-gray-600 bg-white border border-gray-300
-                rounded-lg px-3 py-2
-                hover:bg-red-50 hover:border-red-300 hover:text-red-600
-                transition-colors duration-150
-                whitespace-nowrap
-              "
-            >
-              <span className="text-primary"><IconTrash /></span>
-              Clear All
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Notifications List ── */}
-      {visible.length > 0 ? (
-        <>
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-            {visible.map((notif, idx) => (
-              <NotifRow
-                key={notif.id}
-                notif={notif}
-                isLast={idx === visible.length - 1}
-                onDelete={handleDelete}
-              />
+          {/* Tabs */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit bg-lightBg">
+            {tabs.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => handleTabChange(key)}
+                className={`
+                  px-4 py-1.5 rounded-md text-sm font-semibold transition-all duration-150
+                  ${activeTab === key
+                    ? "bg-secondary text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-700 bg-transparent"
+                  }
+                `}
+              >
+                {label}
+              </button>
             ))}
           </div>
 
-          {/* Load More */}
-          {hasMore && (
-            <div className="flex justify-center pt-1">
+          {/* Search + Action buttons */}
+          <div className="flex items-center gap-2 flex-1 sm:justify-end flex-wrap">
+
+            {/* Search */}
+            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-white flex-1 sm:flex-none sm:w-52 md:w-64 focus-within:border-secondary transition-colors duration-150">
+              <span className="text-gray-400 flex-shrink-0"><IconSearch /></span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearch}
+                placeholder="Search"
+                className="text-sm text-gray-700 bg-transparent border-none w-full placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
+            {/* Mark all as Read — Unread tab only */}
+            {activeTab === "unread" && (
               <button
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                onClick={handleMarkAllAsRead}
                 className="
-                  px-8 py-2.5 rounded-xl
-                  bg-secondary text-white
-                  text-sm font-semibold
-                  hover:brightness-90 transition-all duration-150
-                  shadow-sm
+                  flex items-center gap-1.5
+                  text-xs sm:text-sm font-semibold
+                  text-green-700 bg-green-50 border border-green-200
+                  rounded-lg px-3 py-2
+                  hover:bg-green-100 transition-colors duration-150
+                  whitespace-nowrap
                 "
               >
-                Load More
+                <span className="text-green-600"><IconCheck /></span>
+                <span className="hidden xs:inline sm:inline">Mark all as Read</span>
+                <span className="xs:hidden sm:hidden">Mark Read</span>
               </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <EmptyState tab={activeTab} />
-      )}
+            )}
 
-    </div>
+            {/* Clear All — Read tab only */}
+            {activeTab === "read" && (
+              <button
+                onClick={handleClearAll}
+                className="
+                  flex items-center gap-1.5
+                  text-xs sm:text-sm font-semibold
+                  text-gray-600 bg-white border border-gray-300
+                  rounded-lg px-3 py-2
+                  hover:bg-red-50 hover:border-red-300 hover:text-red-600
+                  transition-colors duration-150
+                  whitespace-nowrap
+                "
+              >
+                <span className="text-primary"><IconTrash /></span>
+                Clear All
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Notifications List ── */}
+        {visible.length > 0 ? (
+          <>
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              {visible.map((notif, idx) => (
+                <NotifRow
+                  key={notif.id}
+                  notif={notif}
+                  isLast={idx === visible.length - 1}
+                  onDelete={handleDelete}
+                  onClick={handleRowClick}
+                />
+              ))}
+            </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex justify-center pt-1">
+                <button
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="
+                    px-8 py-2.5 rounded-xl
+                    bg-secondary text-white
+                    text-sm font-semibold
+                    hover:brightness-90 transition-all duration-150
+                    shadow-sm
+                  "
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyState tab={activeTab} />
+        )}
+
+      </div>
+
+      {/* ── Confirm Modal ── */}
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel}
+          confirmStyle={confirmModal.confirmStyle}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
+    </>
   );
 }

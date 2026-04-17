@@ -17,19 +17,10 @@ const SPEAKERS   = [{ name: "Dr. Arun Bai" }, { name: "Dr. Ashu Rastogi" }];
 const PANELISTS  = [{ name: "Dr. David Chandy" }, { name: "Dr. Sanjeev Kelkar" }];
 const MODERATORS = [{ name: "Dr. Rajesh" }, { name: "Dr. Vikram" }];
 
-// ─── Topbar height from your layout: mt-[80px] means topbar = 80px ───────────
-// Sticky top = topbar height + a small breathing gap (8px)
-const STICKY_TOP = "88px"; // 80px topbar + 8px gap
-// Panel height = full viewport minus topbar, minus top gap, minus bottom gap
-
-const PANEL_HEIGHT  = "calc(100vh - 104px)"; // = calc(100vh - 104px)
-// ─────────────────────────────────────────────────────────────────────────────
-
 function Avatar({ name }: { name: string }) {
-  const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("");
   return (
-    <div className="w-14 h-14 rounded-full bg-lightBg border border-gray-200 flex items-center justify-center">
-      <span className="text-secondary font-bold text-sm">{initials}</span>
+    <div className="w-14 h-14 rounded-full overflow-hidden border border-gray-200">
+      <img src="/images/faculty/demo_faculty.jpg" alt={name} className="w-full h-full object-cover" />
     </div>
   );
 }
@@ -38,7 +29,7 @@ function PersonCard({ name }: { name: string }) {
   return (
     <div className="flex flex-col items-center gap-1.5 w-[72px]">
       <Avatar name={name} />
-      <p className="text-[0.65rem] text-center text-gray-600 leading-tight font-medium">{name}</p>
+      <p className="text-xs text-center text-gray-600 leading-tight font-medium">{name}</p>
     </div>
   );
 }
@@ -52,10 +43,8 @@ function ChatPollsPanel() {
   ];
 
   return (
-    // h-full is critical — it fills the height given by the sticky container
     <div className="flex flex-col h-full bg-white rounded-xl border border-gray-200 overflow-hidden">
-
-      {/* Header — never scrolls */}
+      {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 flex-shrink-0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -63,7 +52,7 @@ function ChatPollsPanel() {
         <span className="text-sm font-bold text-secondary">Chat &amp; Polls</span>
       </div>
 
-      {/* Tabs — never scroll */}
+      {/* Tabs */}
       <div className="flex border-b border-gray-100 flex-shrink-0">
         {tabs.map(({ key, label }) => (
           <button
@@ -80,7 +69,7 @@ function ChatPollsPanel() {
         ))}
       </div>
 
-      {/* Body — the ONLY part that scrolls if content overflows */}
+      {/* Body */}
       <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 p-4 text-center">
         {activeTab === "chat" && (
           <>
@@ -117,7 +106,7 @@ function ChatPollsPanel() {
             <div className="w-10 h-10 rounded-full bg-lightBg flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="1.5">
                 <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="12" y1="20" x2="12" y2="4"  />
                 <line x1="6"  y1="20" x2="6"  y2="14" />
               </svg>
             </div>
@@ -141,17 +130,38 @@ function ChatPollsPanel() {
   );
 }
 
+function AdBanner() {
+  return (
+    <div className="flex-shrink-0 rounded-xl overflow-hidden border border-gray-100">
+      <div className="w-full h-[94px] bg-gradient-to-br from-lightBg to-blue-100 flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-[9px] font-semibold text-secondary/60 uppercase tracking-widest">
+            Your Trusted Partner
+          </p>
+          <p className="text-[9px] text-secondary/50 mt-0.5">
+            in the management of Neuropathy
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-2">
+            <span className="text-sm font-black text-secondary">neuron</span>
+            <span className="text-[10px] font-extrabold text-white bg-primary px-1.5 py-0.5 rounded">NT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LiveSessionPage() {
   return (
     <div className="space-y-4">
 
-      {/* Warning Banner */}
+      {/* ── Warning Banner — unchanged ── */}
       <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
         <div className="flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9"  x2="12"    y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           <p className="text-xs font-semibold text-amber-700">
             <span className="font-bold">Warning Message: </span>
@@ -163,25 +173,13 @@ export default function LiveSessionPage() {
         </button>
       </div>
 
-      {/*
-        ═══════════════════════════════════════════════════════════════════════
-        TWO-COLUMN ROW
-        ═══════════════════════════════════════════════════════════════════════
-        YOUR LAYOUT: body/html scrolls, <main> has no overflow.
-        This means position:sticky works correctly — it scrolls relative
-        to the viewport, which IS the body scroll container.
+      {/* ── Two-column row ── */}
+      <div className="flex flex-col lg:flex-row lg:items-start gap-4">
 
-        WHY items-start IS MANDATORY:
-        Without it, flexbox stretches both columns to the same height
-        (the taller left column). A stretched right column has no room
-        to "stick" because it's already as tall as its parent. With
-        `items-start`, the right column is only as tall as the sticky
-        container itself, so sticky has room to operate.
-        ═══════════════════════════════════════════════════════════════════════
-      */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:items-start">
-
-        {/* ── LEFT: long scrollable content ── */}
+        {/* ════════════════════════════════
+            LEFT COLUMN
+            video title + player + banner + schedule + people
+        ════════════════════════════════ */}
         <div className="flex-1 min-w-0 space-y-4">
 
           {/* Session Header */}
@@ -194,17 +192,17 @@ export default function LiveSessionPage() {
                 <div className="flex flex-wrap items-center gap-3 mt-2">
                   <span className="flex items-center gap-1.5 text-xs text-gray-500">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8"  y1="2" x2="8"  y2="6"/>
-                      <line x1="3"  y1="10" x2="21" y2="10"/>
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8"  y1="2" x2="8"  y2="6" />
+                      <line x1="3"  y1="10" x2="21" y2="10" />
                     </svg>
                     12 Feb 2026
                   </span>
                   <span className="flex items-center gap-1.5 text-xs text-gray-500">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
                     </svg>
                     03:00 PM IST – 07:00 PM IST
                   </span>
@@ -219,19 +217,18 @@ export default function LiveSessionPage() {
 
           {/* Video Player */}
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-            <div className="relative w-full bg-gray-900 flex items-center justify-center" style={{ aspectRatio: "16/9" }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
-              <button className="relative z-10 w-14 h-14 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 group">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" className="ml-1 group-hover:scale-110 transition-transform">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              </button>
+            <div className="relative w-full bg-black" style={{ aspectRatio: "16/9" }}>
+              <iframe
+                src="https://player.vimeo.com/video/24133271"
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Vimeo Video"
+              />
               <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-primary/90 backdrop-blur-sm rounded-full px-2.5 py-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-[10px] font-bold text-white uppercase tracking-wide">Live</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 z-10 h-1 bg-white/10">
-                <div className="h-full w-[35%] bg-primary rounded-full" />
               </div>
             </div>
           </div>
@@ -266,10 +263,10 @@ export default function LiveSessionPage() {
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8"  y1="2" x2="8"  y2="6"/>
-                <line x1="3"  y1="10" x2="21" y2="10"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2"  x2="16" y2="6"  />
+                <line x1="8"  y1="2"  x2="8"  y2="6"  />
+                <line x1="3"  y1="10" x2="21" y2="10" />
               </svg>
               <h2 className="text-sm font-bold text-gray-800">Session Schedule</h2>
             </div>
@@ -277,19 +274,26 @@ export default function LiveSessionPage() {
               {SCHEDULE.map(({ time, topic, speaker }, i) => {
                 const isBreak = speaker === null && topic === "Tea Break";
                 return (
-                  <div key={i} className={`flex gap-4 py-3 ${i < SCHEDULE.length - 1 ? "border-b border-gray-100" : ""}`}>
-                    <span className="text-[0.7rem] font-semibold text-secondary whitespace-nowrap pt-0.5 w-[110px] flex-shrink-0">
+                  <div
+                    key={i}
+                    className={`flex flex-col sm:flex-row gap-1 sm:gap-4 py-3 ${
+                      i < SCHEDULE.length - 1 ? "border-b border-gray-100" : ""
+                    }`}
+                  >
+                    <span className="text-xs font-semibold text-secondary whitespace-nowrap pt-0.5 w-[90px] sm:w-[110px] flex-shrink-0">
                       {time}
                     </span>
                     <div className="flex-1 min-w-0">
                       {isBreak ? (
-                        <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-[0.7rem] font-semibold px-2.5 py-1 rounded-full border border-amber-200">
+                        <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-200">
                           ☕ {topic}
                         </span>
                       ) : (
                         <>
-                          <p className="text-[0.78rem] text-gray-800 font-medium leading-snug">{topic}</p>
-                          {speaker && <p className="text-[0.7rem] text-gray-400 mt-0.5 italic">– {speaker}</p>}
+                          <p className="text-sm text-gray-800 font-medium leading-snug">{topic}</p>
+                          {speaker && (
+                            <p className="text-xs text-gray-500 mt-0.5 italic">– {speaker}</p>
+                          )}
                         </>
                       )}
                     </div>
@@ -301,14 +305,13 @@ export default function LiveSessionPage() {
 
           {/* People */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6">
-            {/* Speakers */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
                 <h3 className="text-sm font-bold text-gray-800">Speakers</h3>
               </div>
@@ -317,14 +320,13 @@ export default function LiveSessionPage() {
               </div>
             </div>
             <div className="border-t border-gray-100" />
-            {/* Panelists */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <line x1="23" y1="11" x2="17" y2="11"/>
-                  <line x1="20" y1="8"  x2="20" y2="14"/>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <line x1="23" y1="11" x2="17" y2="11" />
+                  <line x1="20" y1="8"  x2="20" y2="14" />
                 </svg>
                 <h3 className="text-sm font-bold text-gray-800">Panelists</h3>
               </div>
@@ -333,11 +335,10 @@ export default function LiveSessionPage() {
               </div>
             </div>
             <div className="border-t border-gray-100" />
-            {/* Moderators */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
                 <h3 className="text-sm font-bold text-gray-800">Moderator</h3>
               </div>
@@ -348,80 +349,27 @@ export default function LiveSessionPage() {
           </div>
 
         </div>
-        {/* END LEFT */}
+        {/* END LEFT COLUMN */}
 
-        {/* ── RIGHT: sticky sidebar ── */}
-        {/*
-          position:sticky works here because:
-            ✅ Body/html is the scroll container (you confirmed this)
-            ✅ No ancestor has overflow:auto / overflow:hidden / overflow:scroll
-            ✅ Parent row has `lg:items-start` so this column isn't
-               stretched to match the left column's height
 
-          STICKY_TOP = 88px  → clears the 80px fixed topbar + 8px gap
-          PANEL_HEIGHT = calc(100vh - 104px)
-            = 100vh
-            - 80px  (topbar)
-            - 8px   (top gap, same as STICKY_TOP overshoot)
-            - 16px  (bottom breathing room)
-
-          Inside the sticky div, a flex-col layout:
-            • Ad banner    → flex-shrink-0  (fixed height, never compressed)
-            • Chat wrapper → flex-1 min-h-0 overflow-hidden
-              └─ ChatPollsPanel → h-full flex-col
-                   • Header + Tabs → flex-shrink-0
-                   • Body          → flex-1 overflow-y-auto  ← only this scrolls
-        */}
-        <div className="hidden lg:block w-[300px] xl:w-[320px] flex-shrink-0">
-          <div
-            className="sticky flex flex-col gap-3"
-            style={{
-              top:    STICKY_TOP,
-              height: PANEL_HEIGHT,
-            }}
-          >
-
-            {/* Ad banner — fixed height, never compresses */}
-            <div className="flex-shrink-0 rounded-xl overflow-hidden border border-gray-100">
-              <div className="w-full h-[94px] bg-gradient-to-br from-lightBg to-blue-100 flex items-center justify-center px-4">
-                <div className="text-center">
-                  <p className="text-[9px] font-semibold text-secondary/60 uppercase tracking-widest">Your Trusted Partner</p>
-                  <p className="text-[9px] text-secondary/50 mt-0.5">in the management of Neuropathy</p>
-                  <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <span className="text-sm font-black text-secondary">neuron</span>
-                    <span className="text-[10px] font-extrabold text-white bg-primary px-1.5 py-0.5 rounded">NT</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/*
-              flex-1   → fills all remaining height after the ad banner
-              min-h-0  → CRITICAL: without this a flex child ignores the
-                         parent's constrained height and overflows
-              overflow-hidden → hard clips the child panel
-            */}
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <ChatPollsPanel />
-            </div>
-
+        {/* ════════════════════════════════
+            RIGHT COLUMN — desktop only
+            Ad banner + Chat panel, sticky under topbar
+        ════════════════════════════════ */}
+        <div className="hidden lg:flex flex-col gap-3 w-[300px] xl:w-[320px] flex-shrink-0 sticky top-[104px] self-start">
+          <AdBanner />
+          {/* Chat fills remaining viewport height: 100vh - 80px topbar - 24px top gap - 94px banner - 12px gap - 16px bottom room */}
+          <div style={{ height: "calc(100vh - 226px)" }}>
+            <ChatPollsPanel />
           </div>
         </div>
-        {/* END RIGHT */}
 
-        {/* Mobile: inline below left content */}
+
+        {/* ════════════════════════════════
+            MOBILE / TABLET — unchanged
+        ════════════════════════════════ */}
         <div className="block lg:hidden w-full space-y-3">
-          <div className="flex-shrink-0 rounded-xl overflow-hidden border border-gray-100">
-            <div className="w-full h-[94px] bg-gradient-to-br from-lightBg to-blue-100 flex items-center justify-center px-4">
-              <div className="text-center">
-                <p className="text-[9px] font-semibold text-secondary/60 uppercase tracking-widest">Your Trusted Partner</p>
-                <div className="flex items-center justify-center gap-1.5 mt-2">
-                  <span className="text-sm font-black text-secondary">neuron</span>
-                  <span className="text-[10px] font-extrabold text-white bg-primary px-1.5 py-0.5 rounded">NT</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AdBanner />
           <div style={{ height: "420px" }}>
             <ChatPollsPanel />
           </div>

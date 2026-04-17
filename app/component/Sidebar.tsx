@@ -284,8 +284,8 @@ export default function Sidebar() {
                   }
                   ${
                     isActive
-                      ? "text-primary bg-red-50 font-semibold"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-secondary font-medium"
+                      ? "text-primary bg-primaryLight font-semibold"
+                      : "text-gray-500 hover:bg-secondaryLight hover:text-secondary font-medium text-textPrimary"
                   }
                 `}
               >
@@ -332,7 +332,7 @@ export default function Sidebar() {
           className={`border-t border-gray-200 flex-shrink-0 transition-all duration-300 ${collapsed ? "p-2" : "p-4"}`}
         >
           <Link
-            href="/login"
+            href="/auth/login"
             title={collapsed ? "Log Out" : undefined}
             className="
               flex items-center justify-center gap-2 w-full py-2.5

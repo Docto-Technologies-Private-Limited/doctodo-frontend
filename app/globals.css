@@ -9,17 +9,41 @@
 
   /* THEME COLORS (fallback if JS not loaded) */
   --color-primary: #ED1C24;
+  --color-primaryLight: #FEE9EA;
+
   --color-secondary: #0A3458;
+  --color-secondaryLight: #E0EEFF;
+
   --color-lightBg: #84BCDA;
+
   --color-textPrimary: #212121;
   --color-textSecondary: #3D3D3D;
+  --color-textWhite: #FFFFFF;
+  --color-textDisabled: #AAAAAA;
+
   --color-divider: #D9D9D9;
+
   --color-success: #009B62;
+  --color-successLight: #D7FFEC;
+
   --color-warning: #FF9800;
   --color-warningLight: #FFF3E0;
+
   --color-alert: #CC0000;
+  --color-alertLight: #F3D7DE;
+
   --color-welcome: #0088FF;
-     
+  --color-welcomeLight: #DDEFFF;
+
+  /* FONT SCALE */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
 }
 
 /* ─────────────────────────────────────────────
@@ -34,18 +58,42 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* 🔥 YOUR GLOBAL THEME (NOW TAILWIND CAN USE IT) */
+  /* YOUR GLOBAL THEME (NOW TAILWIND CAN USE IT) */
   --color-primary: var(--color-primary);
+  --color-primaryLight: var(--color-primaryLight);
+
   --color-secondary: var(--color-secondary);
+  --color-secondaryLight: var(--color-secondaryLight);
+
   --color-lightBg: var(--color-lightBg);
+
   --color-textPrimary: var(--color-textPrimary);
   --color-textSecondary: var(--color-textSecondary);
+  --color-textWhite: var(--color-textWhite);
+  --color-textDisabled: var(--color-textDisabled);
+
   --color-divider: var(--color-divider);
+
+  --color-success: var(--color-success);
+  --color-successLight: var(--color-successLight);
+
   --color-warning: var(--color-warning);
   --color-warningLight: var(--color-warningLight);
+
   --color-alert: var(--color-alert);
+  --color-alertLight: var(--color-alertLight);
+
   --color-welcome: var(--color-welcome);
-  --color-success: var(--color-success);
+  --color-welcomeLight: var(--color-welcomeLight);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+
 }
 
 /* ─────────────────────────────────────────────
@@ -53,8 +101,14 @@
 ───────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0a; 
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-textPrimary: #ffffff;
+    --color-textSecondary: #cccccc; 
   }
 }
 
@@ -63,7 +117,6 @@
 ───────────────────────────────────────────── */
 body {
   background: var(--color-background);
-  color: var(--color-foreground);
+  color: var(--color-textPrimary);  
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
- 
