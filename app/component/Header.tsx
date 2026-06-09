@@ -33,7 +33,7 @@ export default function Header() {
         {/* Login button */}
         <button
         onClick={() => router.push("/auth/login")}
-        className="font-semibold text-white rounded-md transition-all duration-200 hover:opacity-90 active:scale-95 sm:block hidden bg-primary"
+        className="font-semibold text-textWhite  rounded-md transition-all duration-200 hover:opacity-90 active:scale-95 sm:block hidden bg-primary"
         style={{
           padding: "clamp(8px, 1.5vw, 11px) clamp(20px, 3vw, 36px)",
           fontSize: "clamp(13px, 1.4vw, 15px)",

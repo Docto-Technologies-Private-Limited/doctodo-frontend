@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { theme } from '@/lib/theme'
+import { theme } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,30 +23,45 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const c = theme.colors;
 
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      style={{
-        // ✅ GLOBAL CSS VARIABLES
-        ['--color-primary' as any]: c.primary,
-        ['--color-secondary' as any]: c.secondary,
-        ['--color-lightBg' as any]: c.lightBg,
-        ['--color-textPrimary' as any]: c.textPrimary,
-        ['--color-textSecondary' as any]: c.textSecondary,
-        ['--color-divider' as any]: c.divider,
-        ['--color-warning' as any]: c.warning,
-        ['--color-alert' as any]: c.alert,
-        ['--color-warningLight' as any]: c.warningLight,
-        ['--color-welcome' as any]: c.welcome,
-        ['--color-success' as any]: c.success,
-      }}
+      style={
+        {
+          "--color-primary": c.primary,
+          "--color-primaryLight": c.primaryLight,
+
+          "--color-secondary": c.secondary,
+          "--color-secondaryLight": c.secondaryLight,
+
+          "--color-lightBg": c.lightBg,
+
+          "--color-textPrimary": c.textPrimary,
+          "--color-textSecondary": c.textSecondary,
+          "--color-textWhite": c.textWhite,
+          "--color-textDisabled": c.textDisabled,
+
+          "--color-divider": c.divider,
+
+          "--color-warning": c.warning,
+          "--color-warningLight": c.warningLight,
+
+          "--color-alert": c.alert,
+          "--color-alertLight": c.alertLight,
+          "--color-alertBg": c.alertBg,
+
+          "--color-success": c.success,
+          "--color-successLight": c.successLight,
+
+          "--color-welcome": c.welcome,
+          "--color-welcomeLight": c.welcomeLight,
+        } as React.CSSProperties
+      }
     >
-     
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col text-textPrimary">
         {children}
       </body>
     </html>

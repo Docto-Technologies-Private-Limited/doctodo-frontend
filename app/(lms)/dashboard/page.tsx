@@ -7,6 +7,16 @@ import {
   CompleteProfileModal,
   useDashboardModals,
 } from "@/app/component/DashboardModal";
+import { Clock } from "lucide-react";
+
+// ─── Font scale (CSS variables → Tailwind) ────────────────────────────────────
+// --text-xs:   12px → text-xs
+// --text-sm:   14px → text-sm
+// --text-base: 16px → text-base
+// --text-lg:   18px → text-lg
+// --text-xl:   20px → text-xl   ← TopBar page title (ceiling)
+// --text-2xl:  24px → text-2xl
+// --text-3xl:  30px → text-3xl
 
 // ─── Session data ─────────────────────────────────────────────────────────────
 const SESSIONS = [
@@ -36,6 +46,103 @@ const SESSIONS = [
   },
 ];
 
+// ─── Session Card ─────────────────────────────────────────────────────────────
+function SessionCard({
+  monthYear,
+  day,
+  dayLabel,
+  title,
+  timeRange,
+}: Omit<(typeof SESSIONS)[number], "id">) {
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200">
+
+      {/* ── Top row: badge + info + view button (desktop/tablet) ── */}
+      <div className="flex items-center gap-4 px-4 py-4">
+
+        {/* Date badge — fixed dimensions, never squishes */}
+        <div
+          className="
+            flex-shrink-0
+            w-[72px] h-[76px]
+            bg-secondary rounded-xl
+            flex flex-col items-center justify-center gap-0
+          "
+        >
+          {/* "Jun 2024" — fits on one line at text-xs */}
+          <span className="text-xs font-semibold text-white/70 leading-none tracking-wide">
+            {monthYear}
+          </span>
+          {/* Day number — dominant */}
+          <span className="text-2xl font-extrabold text-white leading-tight mt-0.5">
+            {day}
+          </span>
+          {/* Day of week */}
+          <span className="text-xs font-bold text-white/70 leading-none tracking-widest uppercase mt-0.5">
+            {dayLabel}
+          </span>
+        </div>
+
+        {/* Info block — title + time chip */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+          <p className="text-sm md:text-base lg:text-base font-semibold text-textSecondary leading-snug">
+            {title}
+          </p>
+          {/* Time chip */}
+          <span className="
+            inline-flex items-center gap-1.5
+            self-start
+            bg-welcomeLight rounded-full
+            px-1.5 py-1
+            text-[9px] md:text-xs lg:text-xs text-secondary
+            whitespace-nowrap
+          ">
+            <Clock size={11} strokeWidth={2.5} className="flex-shrink-0" />
+            {timeRange}
+          </span>
+        </div>
+
+        {/* View button — visible on sm+ (desktop & tablet), hidden on mobile */}
+        <Link
+          href="#"
+          className="
+            hidden sm:inline-flex
+            flex-shrink-0
+            items-center justify-center
+            bg-primary text-white
+            text-sm font-semibold
+            no-underline hover:brightness-90
+            transition-all
+            rounded-lg
+            px-5 py-2.5
+            whitespace-nowrap
+          "
+        >
+          View
+        </Link>
+      </div>
+
+      {/* ── Mobile-only: full-width "View Programme" button ── */}
+      <div className="sm:hidden px-4 pb-4">
+        <Link
+          href="#"
+          className="
+            flex items-center justify-center w-full
+            bg-primary text-white
+            text-sm font-semibold
+            no-underline hover:brightness-90
+            transition-all rounded-lg
+            py-3
+          "
+        >
+          View Programme
+        </Link>
+      </div>
+
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const modals = useDashboardModals();
@@ -43,24 +150,20 @@ export default function HomePage() {
   return (
     <>
       {/* ── Content Wrapper ── */}
-      
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-6 ">
-
-        <h1 className="text-base sm:text-lg font-bold text-gray-900">Dashboard</h1>
+      <div className="space-y-6">
 
         {/* ── Welcome ── */}
         <div>
-          <p className="text-base font-semibold text-gray-800">
+          <p className="text-base md:text-xl lg:text-xl font-semibold text-textPrimary">
             Welcome Back, <strong className="text-secondary">David Joe</strong>
           </p>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-xs md:text-sm lg:text-sm text-textSecondary mt-0.5">
             Here&apos;s a list of the upcoming Programmes on Neuropathy Management.
           </p>
         </div>
 
         {/* ── Ad Banner ── */}
         <div className="w-full rounded-[15px] overflow-hidden">
-          {/* Desktop & Tablet */}
           <Image
             src="/images/ads/desktop_banner.jpg"
             alt="Meganeuron – Your Trusted Partner in the management of Neuropathy"
@@ -69,7 +172,6 @@ export default function HomePage() {
             priority
             className="hidden md:block w-full h-[220px] object-cover"
           />
-          {/* Mobile */}
           <Image
             src="/images/ads/mobile_banner.jpg"
             alt="Meganeuron – Your Trusted Partner in the management of Neuropathy"
@@ -80,71 +182,32 @@ export default function HomePage() {
           />
         </div>
 
-        {/* ── Upcoming Live Sessions ── */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-800">Upcoming Live Sessions</h2>
-            <Link href="/sessions" className="text-sm font-semibold text-secondary no-underline hover:underline">
-              View All
-            </Link>
-          </div>
+      </div>
 
-          <div className="flex flex-col gap-3">
-            {SESSIONS.map(({ id, monthYear, day, dayLabel, title, timeRange }) => (
-              <div
-                key={id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 py-3.5 bg-white border border-gray-200 rounded-xl transition-shadow duration-200 hover:shadow-md"
-              >
-                {/* Date badge + Info row */}
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {/* Date badge */}
-                  <div className="w-[62px] min-w-[62px] h-[68px] bg-secondary rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                    <span className="text-[0.65rem] font-semibold text-white/75 tracking-wider uppercase">
-                      {monthYear}
-                    </span>
-                    <span className="text-[1.6rem] font-extrabold text-white leading-none font-display">
-                      {day}
-                    </span>
-                    <span className="text-[0.65rem] font-semibold text-white/65 tracking-wider uppercase">
-                      {dayLabel}
-                    </span>
-                  </div>
+      {/* ── Sessions card ── */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3 mt-5">
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[0.9rem] font-semibold text-gray-900 leading-snug">
-                      {title}
-                    </p>
-                   <span className="inline-flex items-center gap-1.5 mt-1.5 bg-lightBg rounded-full 
-                    px-1.5 py-0.5 text-[10px] 
-                    sm:px-2.5 sm:py-1 sm:text-[0.72rem] 
-                    text-secondary font-medium whitespace-nowrap">
-                      
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
+        {/* Section header */}
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-base md:text-xl lg:text-xl font-semibold text-textPrimary">Upcoming Live Sessions</h2>
+          <Link
+            href="/programme"
+            className="text-xs lg:text-sm font-semibold text-secondary no-underline hover:underline"
+          >
+            View All
+          </Link>
+        </div>
 
-                      {timeRange}
-                    </span>
-                  </div>
-                </div>
+        {/* Cards */}
+        <div className="flex flex-col gap-3">
+          {SESSIONS.map(({ id, ...rest }) => (
+            <SessionCard key={id} {...rest} />
+          ))}
+        </div>
 
-                {/* CTA */}
-                <Link
-                  href="#"
-                  className="block text-center bg-primary text-white font-semibold no-underline hover:brightness-90 transition-all rounded-lg sm:rounded-md w-full sm:w-auto px-5 py-2.5 sm:py-2 text-sm sm:text-[0.82rem] flex-shrink-0"
-                >
-                  View
-                </Link>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Modal triggers ── */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-200">
-          <span className="text-xs text-gray-400">Modals:</span>
+        {/* ── Modal triggers (dev only) ── */}
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
+          <span className="text-xs text-textSecondary">Modals:</span>
           <button
             suppressHydrationWarning
             onClick={modals.openWelcome}
@@ -152,7 +215,7 @@ export default function HomePage() {
           >
             Open Welcome Modal
           </button>
-          <span className="text-gray-300 text-xs">|</span>
+          <span className="text-textSecondary text-xs">|</span>
           <button
             suppressHydrationWarning
             onClick={modals.openProfile}

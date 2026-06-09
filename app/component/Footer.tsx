@@ -1,13 +1,9 @@
 export default function Footer() {
   return (
-    <footer
-      className="w-full py-4 px-4 text-center bg-secondary">
-      <p
-        className="text-sm font-semibold tracking-wide"
-        style={{ color: 'rgba(255,255,255,0.85)' }}
-      >
+    <footer className="w-full bg-secondary py-3 px-4">
+      <p className="text-textWhite text-sm font-semibold tracking-wide text-center">
         © {new Date().getFullYear()}{' '}
-        <span className="font-black text-white tracking-wider">VIDOCTO</span>
+        <span className="font-bold tracking-wider">VIDOCTO</span>
         <span className="font-normal">. All rights reserved.</span>
       </p>
     </footer>

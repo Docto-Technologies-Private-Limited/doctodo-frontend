@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { X, Check } from "lucide-react";
 
 // ─── Shared close button ──────────────────────────────────────────────────────
 const CloseBtn = ({ onClick }: { onClick: () => void }) => (
@@ -8,20 +9,9 @@ const CloseBtn = ({ onClick }: { onClick: () => void }) => (
     onClick={onClick}
     aria-label="Close"
     type="button"
-    className="absolute top-3.5 right-4 w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
+    className="absolute top-3.5 right-4 w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-textPrimary hover:text-gray-900 transition-colors"
   >
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.2}
-      strokeLinecap="round"
-    >
-      <line x1="1" y1="1" x2="13" y2="13" />
-      <line x1="13" y1="1" x2="1" y2="13" />
-    </svg>
+    <X size={14} strokeWidth={2.2} />
   </button>
 );
 
@@ -65,9 +55,9 @@ const ModalBackdrop = ({
 //  MODAL 1 — Welcome / Set Up Your Account
 // ─────────────────────────────────────────────────────────────────────────────
 const SETUP_CHECKLIST = [
-  { title: "Account Info",              desc: "Login credentials and contact details" },
-  { title: "Personal Info",             desc: "Basic profile and location details" },
-  { title: "Professional Information",  desc: "Registration and workplace details" },
+  { title: "Account Info",             desc: "Login credentials and contact details" },
+  { title: "Personal Info",            desc: "Basic profile and location details" },
+  { title: "Professional Information", desc: "Registration and workplace details" },
 ];
 
 interface WelcomeModalProps {
@@ -88,10 +78,10 @@ export function WelcomeModal({ isOpen, onClose, onContinue }: WelcomeModalProps)
         </span>
       </div>
 
-      <h2 className="text-center font-display font-extrabold text-2xl mb-1 text-secondary">
+      <h2 className="text-center font-display font-extrabold text-xl md:text-2xl lg:text-2xl mb-1 text-secondary">
         Set Up Your Account
       </h2>
-      <p className="text-center text-gray-500 text-sm mb-5">
+      <p className="text-center text-textPrimary text-xs md:text-sm lg:text-sm mb-5">
         Complete your profile to get started and unlock all features.
       </p>
 
@@ -100,13 +90,11 @@ export function WelcomeModal({ isOpen, onClose, onContinue }: WelcomeModalProps)
         {SETUP_CHECKLIST.map(({ title, desc }) => (
           <div key={title} className="flex items-start gap-2.5 py-2.5">
             <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="2 6 5 9 10 3" />
-              </svg>
+              <Check size={11} strokeWidth={2.2} className="text-white" />
             </div>
-            <p className="font-body text-sm font-medium text-gray-900 leading-snug">
+            <p className="font-body text-sm font-medium text-textPrimary leading-snug">
               {title}&nbsp;
-              <span className="font-normal text-gray-400 text-xs">– {desc}</span>
+              <span className="font-normal text-textPrimary text-xs">– {desc}</span>
             </p>
           </div>
         ))}
@@ -114,7 +102,7 @@ export function WelcomeModal({ isOpen, onClose, onContinue }: WelcomeModalProps)
 
       <button
         onClick={onContinue}
-        className="w-full mt-5 inline-flex items-center justify-center gap-1.5 bg-secondary hover:bg-[#0c3f6a] text-white font-body text-sm font-semibold rounded-lg px-5 py-3 transition-all hover:-translate-y-px"
+        className="w-full mt-5 inline-flex items-center justify-center gap-1.5 bg-primary text-white font-body text-sm font-semibold rounded-lg px-5 py-3 transition-all hover:-translate-y-px"
       >
         Go to My Account →
       </button>
@@ -169,10 +157,10 @@ export function CompleteProfileModal({ isOpen, onClose, onSave }: CompleteProfil
         </span>
       </div>
 
-      <h2 className="text-center font-display font-extrabold text-2xl mb-1 text-secondary">
+      <h2 className="text-center font-display font-extrabold text-xl md:text-2xl lg:text-2xl mb-1 text-secondary">
         Complete Your Profile
       </h2>
-      <p className="text-center text-gray-500 text-sm mb-5">
+      <p className="text-center text-textPrimary text-xs md:text-sm lg:text-sm mb-5">
         Update your profile to continue and access the programme
       </p>
 
@@ -180,7 +168,7 @@ export function CompleteProfileModal({ isOpen, onClose, onSave }: CompleteProfil
       <div className="space-y-3.5">
         {FIELDS.map(({ name, label, placeholder }) => (
           <div key={name}>
-            <label htmlFor={name} className="block text-xs font-semibold text-gray-700 mb-1.5">
+            <label htmlFor={name} className="block text-xs font-semibold text-textPrimary mb-1.5">
               {label}
             </label>
             <input
@@ -190,7 +178,7 @@ export function CompleteProfileModal({ isOpen, onClose, onSave }: CompleteProfil
               value={form[name]}
               onChange={handleChange}
               placeholder={placeholder}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 font-body text-sm text-gray-900 bg-gray-50 outline-none transition-all focus:border-secondary focus:ring-2 focus:ring-secondary/10 focus:bg-white"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 font-body text-sm text-textPrimary bg-gray-50 outline-none transition-all focus:border-secondary focus:ring-2 focus:ring-secondary/10 focus:bg-white"
             />
           </div>
         ))}
@@ -210,8 +198,8 @@ export function CompleteProfileModal({ isOpen, onClose, onSave }: CompleteProfil
 //  Combined hook — manages both modal states + the welcome→profile transition
 // ─────────────────────────────────────────────────────────────────────────────
 export function useDashboardModals() {
-  const [welcomeOpen,  setWelcomeOpen]  = useState(false);
-  const [profileOpen,  setProfileOpen]  = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Lock scroll when any modal is open
   useEffect(() => {
