@@ -9,37 +9,7 @@ const SLIDES = [
 ]
 
 const AUTO_PLAY_MS = 3000
-
-function Arrow({ dir, onClick }: { dir: 'prev' | 'next'; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={dir === 'prev' ? 'Previous slide' : 'Next slide'}
-      className={`
-        absolute top-1/2 -translate-y-1/2 z-20
-        flex items-center justify-center
-        rounded-full bg-white/90 shadow-md
-        hover:scale-110 hover:bg-white active:scale-95
-        transition-transform duration-150
-        w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10
-        ${dir === 'prev' ? 'left-2 sm:left-3' : 'right-2 sm:right-3'}
-      `}
-    >
-      <svg
-        className="w-3 h-3 sm:w-4 sm:h-4"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        fill="none"
-      >
-        {dir === 'prev'
-          ? <polyline points="15 18 9 12 15 6" />
-          : <polyline points="9 18 15 12 9 6" />}
-      </svg>
-    </button>
-  )
-}
-
+ 
 export default function HeroCarousel() {
   const [current, setCurrent] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -133,10 +103,7 @@ export default function HeroCarousel() {
                 </div>
               ))}
             </div>
-
-            {/* Arrows */}
-            {/* <Arrow dir="prev" onClick={prev} />
-            <Arrow dir="next" onClick={next} /> */}
+ 
           </div>
         </div>
 
@@ -148,11 +115,11 @@ export default function HeroCarousel() {
               onClick={() => go(i)}
               aria-label={`Go to slide ${i + 1}`}
               className={`
-                w-2.5 h-2.5 sm:w-3 sm:h-3
-                rounded-full transition-colors duration-300
+                transition-all duration-300 rounded-full
                 ${i === current
-                  ? 'bg-primary'
-                  : 'bg-divider'}
+                  ? 'w-8 h-[3px] bg-secondary'     // active line
+                  : 'w-4 h-[3px] bg-gray-300'   // inactive line
+                }
               `}
             />
           ))}

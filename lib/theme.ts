@@ -24,6 +24,7 @@ export const theme = {
     warningLight:  '#FFF3E0',
     alert:         '#CC0000',
     alertLight:    '#F3D7DE',
+    alertBg:       '#FCF6F6',
     success:       '#009B62',
     successLight:  '#D7FFEC',
     welcome:       '#0088FF',

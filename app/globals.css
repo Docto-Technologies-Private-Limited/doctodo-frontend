@@ -31,6 +31,7 @@
 
   --color-alert: #CC0000;
   --color-alertLight: #F3D7DE;
+  --color-alertBg: #FCF6F6;
 
   --color-welcome: #0088FF;
   --color-welcomeLight: #DDEFFF;
@@ -82,6 +83,7 @@
 
   --color-alert: var(--color-alert);
   --color-alertLight: var(--color-alertLight);
+  --color-alertBg: var(--color-alertBg);
 
   --color-welcome: var(--color-welcome);
   --color-welcomeLight: var(--color-welcomeLight);

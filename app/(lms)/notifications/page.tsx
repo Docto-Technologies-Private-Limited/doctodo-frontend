@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { Clock, Trash2, Search, Bell, CheckCheck, AlertTriangle } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type TabKey = "all" | "unread" | "read";
@@ -12,72 +13,23 @@ interface Notification {
   body: string;
   time: string;
   read: boolean;
-  dot: "green" | "grey";
+  dot: "success" | "grey";
 }
 
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 const SEED: Notification[] = [
-  { id: 1,  title: "Live Now: Neuropathy Management – Module 1",  body: "Dr. Rajesh Kumar has started the live session. Join now to participate.", time: "5 Mins ago",  read: false, dot: "green" },
-  { id: 2,  title: "Reminder: Live Session Starts in 30 Minutes", body: "Dr. Rajesh Kumar has started the live session. Join now to participate.", time: "12 Mins ago", read: false, dot: "green" },
+  { id: 1,  title: "Live Now: Neuropathy Management – Module 1",  body: "Dr. Rajesh Kumar has started the live session. Join now to participate.", time: "5 Mins ago",  read: false, dot: "success" },
+  { id: 2,  title: "Reminder: Live Session Starts in 30 Minutes", body: "Dr. Rajesh Kumar has started the live session. Join now to participate.", time: "12 Mins ago", read: false, dot: "success" },
   { id: 3,  title: "Session Rescheduled",                         body: 'The session "Clinical Case Discussions – Neuropathy" has been moved to 14th Feb, 7:30 PM IST.', time: "18 Mins ago", read: true,  dot: "grey"  },
-  { id: 4,  title: "New Programme Available",                     body: 'A new CME programme on "Peripheral Neuropathy Diagnosis" is now open for registration.',   time: "25 Mins ago", read: false, dot: "green" },
-  { id: 5,  title: "Registration Successful",                     body: 'You have successfully registered for "Neuropathy Masterclass – Batch 3".', time: "1 hr ago",   read: false, dot: "green" },
+  { id: 4,  title: "New Programme Available",                     body: 'A new CME programme on "Peripheral Neuropathy Diagnosis" is now open for registration.',   time: "25 Mins ago", read: false, dot: "success" },
+  { id: 5,  title: "Registration Successful",                     body: 'You have successfully registered for "Neuropathy Masterclass – Batch 3".', time: "1 hr ago",   read: false, dot: "success" },
   { id: 6,  title: "Session Completed",                           body: '"Pain Management in Neuropathy" has ended. Recording will be available shortly.',            time: "2 hrs ago",  read: true,  dot: "grey"  },
-  { id: 7,  title: "Certificate Ready for Download",              body: 'Your participation certificate for "Neuropathy Clinical Training" is now available.',        time: "5 hrs ago",  read: false, dot: "green" },
+  { id: 7,  title: "Certificate Ready for Download",              body: 'Your participation certificate for "Neuropathy Clinical Training" is now available.',        time: "5 hrs ago",  read: false, dot: "success" },
   { id: 8,  title: "Guest Speaker Announced",                     body: 'Dr. Anjali Mehta will lead the upcoming session on "Advanced Nerve Conduction Studies".',    time: "12 hrs ago", read: true,  dot: "grey"  },
-  { id: 9,  title: "Programme Content Updated",                   body: 'New case studies have been added to "Comprehensive Neuropathy Management".',                  time: "12 hrs ago", read: false, dot: "green" },
+  { id: 9,  title: "Programme Content Updated",                   body: 'New case studies have been added to "Comprehensive Neuropathy Management".',                  time: "12 hrs ago", read: false, dot: "success" },
 ];
 
 const PAGE_SIZE = 5;
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
-function IconClock() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-function IconTrash() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4h6v2" />
-    </svg>
-  );
-}
-function IconSearch() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-function IconBell() {
-  return (
-    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0A3458" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6.002 6.002 0 0 0-4-5.659V4a2 2 0 1 0-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" />
-    </svg>
-  );
-}
-function IconCheck() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-function IconWarning() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
-  );
-}
 
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
 interface ConfirmModalProps {
@@ -99,11 +51,11 @@ function ConfirmModal({
 }: ConfirmModalProps) {
   const confirmClass =
     confirmStyle === "success"
-      ? "bg-green-600 hover:bg-green-700 text-white"
-      : "bg-red-600 hover:bg-red-700 text-white";
+      ? "bg-success text-white"
+      : "bg-alert text-white";
 
   const iconBg =
-    confirmStyle === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500";
+    confirmStyle === "success" ? "bg-successLight text-success" : "bg-alertLight text-alert";
 
   return (
     <div
@@ -113,7 +65,7 @@ function ConfirmModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden">
         <div className="p-6 flex flex-col items-center text-center gap-3">
           <div className={`w-12 h-12 rounded-full flex items-center justify-center ${iconBg}`}>
-            <IconWarning />
+            <AlertTriangle size={22} />
           </div>
           <h2 className="text-base font-bold text-gray-900">{title}</h2>
           <p className="text-sm text-gray-500 leading-relaxed">{message}</p>
@@ -147,7 +99,7 @@ function EmptyState({ tab }: { tab: TabKey }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200">
       <div className="w-20 h-20 rounded-full bg-lightBg flex items-center justify-center mb-5">
-        <IconBell />
+        <Bell size={36} stroke="#0A3458" strokeWidth={1.4} />
       </div>
       <p className="text-base font-bold text-gray-700 mb-1">{title}</p>
       <p className="text-sm text-gray-400 text-center max-w-xs leading-relaxed px-4">{subtitle}</p>
@@ -158,7 +110,6 @@ function EmptyState({ tab }: { tab: TabKey }) {
 // ─── Notification Row ─────────────────────────────────────────────────────────
 function NotifRow({
   notif,
-  isLast,
   onDelete,
   onClick,
 }: {
@@ -172,26 +123,30 @@ function NotifRow({
       onClick={() => onClick(notif)}
       className={`
         group flex items-start gap-3 px-4 sm:px-5 py-4
+        rounded-2xl border border-gray-200 shadow-sm
         transition-colors duration-150 cursor-pointer
         ${notif.read ? "bg-white hover:bg-gray-50" : "bg-blue-50/60 hover:bg-blue-50"}
-        ${!isLast ? "border-b border-gray-100" : ""}
       `}
     >
       {/* Status dot */}
       <span
         className={`
           mt-[7px] flex-shrink-0 w-2.5 h-2.5 rounded-full
-          ${notif.dot === "green" ? "bg-green-500" : "bg-slate-400"}
+          ${notif.dot === "success" ? "bg-success" : "bg-slate-400"}
         `}
       />
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 leading-snug">{notif.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 leading-relaxed line-clamp-1">{notif.body}</p>
+        <p className="text-xs md:text-sm lg:text-sm font-semibold text-textPrimary leading-snug">
+          {notif.title}
+        </p>
+        <p className="text-xs md:text-sm lg:text-sm text-textSecondary mt-0.5 leading-relaxed line-clamp-1">
+          {notif.body}
+        </p>
         <div className="flex items-center gap-1 mt-1.5 text-gray-400">
-          <IconClock />
-          <span className="text-xs">{notif.time}</span>
+          <Clock size={13} />
+          <span className="text-xs md:text-sm lg:text-sm text-textSecondary">{notif.time}</span>
         </div>
       </div>
 
@@ -200,15 +155,15 @@ function NotifRow({
         onClick={(e) => { e.stopPropagation(); onDelete(notif.id); }}
         className="
           flex-shrink-0 w-8 h-8 rounded-lg
-          bg-red-50 hover:bg-red-100
+          bg-alertLight
           flex items-center justify-center
-          text-red-400 hover:text-red-500
+          text-alert
           transition-colors duration-150
           mt-0.5
         "
         aria-label="Delete notification"
       >
-        <IconTrash />
+        <Trash2 size={15} />
       </button>
     </div>
   );
@@ -222,6 +177,7 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab]         = useState<TabKey>("all");
   const [searchQuery, setSearchQuery]     = useState("");
   const [visibleCount, setVisibleCount]   = useState(PAGE_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Confirm modal state
   const [confirmModal, setConfirmModal] = useState<null | {
@@ -231,6 +187,9 @@ export default function NotificationsPage() {
     confirmStyle?: "danger" | "success";
     onConfirm: () => void;
   }>(null);
+
+  // Sentinel ref for IntersectionObserver
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // ── Derived list ──
   const filtered = useMemo(() => {
@@ -248,6 +207,28 @@ export default function NotificationsPage() {
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = filtered.length > visibleCount;
+
+  // ── IntersectionObserver — load more when sentinel enters viewport ──
+  const loadMore = useCallback(() => {
+    if (!hasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    // Tiny delay so the spinner is visible; remove setTimeout for instant load
+    setTimeout(() => {
+      setVisibleCount((c) => c + PAGE_SIZE);
+      setIsLoadingMore(false);
+    }, 400);
+  }, [hasMore, isLoadingMore]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   // ── Handlers ──
   const handleTabChange = (tab: TabKey) => {
@@ -300,7 +281,6 @@ export default function NotificationsPage() {
   };
 
   const handleRowClick = (notif: Notification) => {
-    // Mark as read when opening
     setNotifications((prev) =>
       prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
     );
@@ -318,16 +298,6 @@ export default function NotificationsPage() {
     <>
       <div className="space-y-4 sm:space-y-5">
 
-        {/* ── Page Header ── */}
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-            Notifications
-          </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Stay updated with your latest activity
-          </p>
-        </div>
-
         {/* ── Controls Row ── */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
 
@@ -341,7 +311,7 @@ export default function NotificationsPage() {
                   px-4 py-1.5 rounded-md text-sm font-semibold transition-all duration-150
                   ${activeTab === key
                     ? "bg-secondary text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 bg-transparent"
+                    : "text-textPrimary hover:text-gray-700 bg-transparent"
                   }
                 `}
               >
@@ -355,13 +325,13 @@ export default function NotificationsPage() {
 
             {/* Search */}
             <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 bg-white flex-1 sm:flex-none sm:w-52 md:w-64 focus-within:border-secondary transition-colors duration-150">
-              <span className="text-gray-400 flex-shrink-0"><IconSearch /></span>
+              <span className="text-gray-400 flex-shrink-0"><Search size={15} /></span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="Search"
-                className="text-sm text-gray-700 bg-transparent border-none w-full placeholder-gray-400 focus:outline-none"
+                className="text-xs text-textSecondary bg-transparent border-none w-full placeholder-gray-400 focus:outline-none"
               />
             </div>
 
@@ -371,14 +341,13 @@ export default function NotificationsPage() {
                 onClick={handleMarkAllAsRead}
                 className="
                   flex items-center gap-1.5
-                  text-xs sm:text-sm font-semibold
-                  text-green-700 bg-green-50 border border-green-200
+                  text-xs font-semibold
+                  text-textPrimary border border-gray-300
                   rounded-lg px-3 py-2
-                  hover:bg-green-100 transition-colors duration-150
                   whitespace-nowrap
                 "
               >
-                <span className="text-green-600"><IconCheck /></span>
+                <span className="text-success"><CheckCheck size={14} strokeWidth={2.5} /></span>
                 <span className="hidden xs:inline sm:inline">Mark all as Read</span>
                 <span className="xs:hidden sm:hidden">Mark Read</span>
               </button>
@@ -390,15 +359,14 @@ export default function NotificationsPage() {
                 onClick={handleClearAll}
                 className="
                   flex items-center gap-1.5
-                  text-xs sm:text-sm font-semibold
-                  text-gray-600 bg-white border border-gray-300
+                  text-xs font-semibold
+                  text-alert bg-white border border-alert-300
                   rounded-lg px-3 py-2
-                  hover:bg-red-50 hover:border-red-300 hover:text-red-600
                   transition-colors duration-150
                   whitespace-nowrap
                 "
               >
-                <span className="text-primary"><IconTrash /></span>
+                <span className="text-alert"><Trash2 size={15} /></span>
                 Clear All
               </button>
             )}
@@ -407,37 +375,27 @@ export default function NotificationsPage() {
 
         {/* ── Notifications List ── */}
         {visible.length > 0 ? (
-          <>
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              {visible.map((notif, idx) => (
-                <NotifRow
-                  key={notif.id}
-                  notif={notif}
-                  isLast={idx === visible.length - 1}
-                  onDelete={handleDelete}
-                  onClick={handleRowClick}
-                />
-              ))}
-            </div>
+          <div className="flex flex-col gap-3">
+            {visible.map((notif, idx) => (
+              <NotifRow
+                key={notif.id}
+                notif={notif}
+                isLast={idx === visible.length - 1}
+                onDelete={handleDelete}
+                onClick={handleRowClick}
+              />
+            ))}
 
-            {/* Load More */}
-            {hasMore && (
-              <div className="flex justify-center pt-1">
-                <button
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="
-                    px-8 py-2.5 rounded-xl
-                    bg-secondary text-white
-                    text-sm font-semibold
-                    hover:brightness-90 transition-all duration-150
-                    shadow-sm
-                  "
-                >
-                  Load More
-                </button>
+            {/* Sentinel — observed to trigger next page */}
+            <div ref={sentinelRef} className="h-1" aria-hidden="true" />
+
+            {/* Spinner shown while loading */}
+            {isLoadingMore && (
+              <div className="flex justify-center py-4">
+                <span className="w-5 h-5 rounded-full border-2 border-secondary border-t-transparent animate-spin" />
               </div>
             )}
-          </>
+          </div>
         ) : (
           <EmptyState tab={activeTab} />
         )}
